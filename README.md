@@ -169,6 +169,13 @@ you might bolt on later.
 and the size is part of the cache key, so the next run re-embeds whatever was
 tagged. Tune with `--cache` first and write once at the end.
 
+**Large folders are fine.** Similarity is worked out pair by pair as the
+clustering asks for it, so nothing grows with the square of the album. What
+you pay for is the embeddings, about 3 KB per photo held in memory and
+roughly 60 ms per photo on a laptop GPU. The exception is a very large
+`--gap`, which lets groups grow long, and a long group means many pairs to
+check against.
+
 Removing a tag later is one command.
 
 ```

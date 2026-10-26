@@ -9,6 +9,8 @@ import unittest
 from datetime import datetime
 from pathlib import Path
 
+import numpy as np
+
 import group_scenes as gs
 
 SUBJECT = gs.SUBJECT
@@ -183,6 +185,39 @@ class Cluster(unittest.TestCase):
 
     def test_nothing_in_nothing_out(self):
         self.assertEqual(self.cluster([], []), [])
+
+
+class LazySimilarity(unittest.TestCase):
+    def setUp(self):
+        raw = np.random.default_rng(7).standard_normal((12, 8))
+        self.vectors = raw / np.linalg.norm(raw, axis=1, keepdims=True)
+        self.matrix = (self.vectors @ self.vectors.T).tolist()
+        self.lazy = gs.Similarity(self.vectors)
+
+    def test_every_cell_matches_the_full_matrix(self):
+        for i in range(len(self.vectors)):
+            for j in range(len(self.vectors)):
+                self.assertAlmostEqual(self.lazy[i][j], self.matrix[i][j])
+
+    def test_a_photo_with_itself_is_one(self):
+        for i in range(len(self.vectors)):
+            self.assertAlmostEqual(self.lazy[i][i], 1.0)
+
+    def test_reading_is_symmetric(self):
+        self.assertAlmostEqual(self.lazy[3][7], self.lazy[7][3])
+
+    def test_a_cell_is_a_plain_float(self):
+        # the report formats these, and cluster compares them
+        self.assertIsInstance(self.lazy[0][1], float)
+
+    def test_clustering_agrees_with_the_full_matrix(self):
+        times = [float(i * 10) for i in range(len(self.vectors))]
+        order = sorted(range(len(times)), key=lambda i: times[i])
+        for threshold in (-0.5, 0.0, 0.3):
+            self.assertEqual(
+                gs.cluster(order, self.matrix, times, threshold, 180.0),
+                gs.cluster(order, self.lazy, times, threshold, 180.0),
+            )
 
 
 class Chunks(unittest.TestCase):

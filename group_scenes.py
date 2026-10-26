@@ -153,6 +153,35 @@ def embed(paths, device, cache_path):
     return [p for p, _ in kept], np.stack([v for _, v in kept])
 
 
+class Row:
+    __slots__ = ("one", "rest")
+
+    def __init__(self, one, rest):
+        self.one = one
+        self.rest = rest
+
+    def __getitem__(self, other):
+        return float(self.one @ self.rest[other])
+
+
+class Similarity:
+    """Cosine similarity between any two photos, without the full matrix.
+
+    Clustering asks for a few hundred pairs out of n squared, and the rest
+    of the matrix is built only to be thrown away. This keeps the same
+    similarity[i][j] reading and does the dot product when it is asked for.
+    Vectors are unit length, so the dot product is the cosine.
+    """
+
+    __slots__ = ("vectors",)
+
+    def __init__(self, vectors):
+        self.vectors = vectors
+
+    def __getitem__(self, index):
+        return Row(self.vectors[index], self.vectors)
+
+
 def cluster(order, similarity, times, threshold, gap):
     groups = []
     current = []
@@ -371,7 +400,7 @@ def main():
 
     paths, vectors = embed(found, pick_device(args.device), args.cache)
     times = [shot_time(p) for p in paths]
-    similarity = (vectors @ vectors.T).tolist()
+    similarity = Similarity(vectors)
 
     order = sorted(range(len(paths)), key=lambda i: times[i])
     scenes = cluster(order, similarity, times, args.threshold, args.gap)
