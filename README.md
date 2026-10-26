@@ -42,6 +42,14 @@ own, so torch does not land in your system Python. Plain `pip install
 git+https://github.com/mtsylko/scene-dedupe` works the same inside a
 virtualenv you made yourself.
 
+Torch ships wheels for Python 3.10 to 3.14. A freshly installed pipx often
+defaults to something newer, and then the install fails. Point it at an
+interpreter that works:
+
+```
+pipx install --python python3.12 git+https://github.com/mtsylko/scene-dedupe
+```
+
 To work on the code instead:
 
 ```
