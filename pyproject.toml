@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scene-dedupe"
+version = "0.1.0"
+description = "Find photos of the same scene in a folder and tag them as XMP scenes"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Maxim" }]
+keywords = ["photos", "duplicates", "dinov2", "exiftool", "xmp"]
+dependencies = [
+    "torch>=2.0",
+    "transformers>=4.30",
+    "pillow>=10.0",
+    "pillow-heif>=0.13",
+    "numpy>=1.24",
+]
+
+[project.urls]
+Homepage = "https://github.com/mtsylko/scene-dedupe"
+
+[project.scripts]
+scene-dedupe = "group_scenes:main"
+
+[tool.setuptools]
+py-modules = ["group_scenes"]

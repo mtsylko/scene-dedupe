@@ -34,6 +34,17 @@ limiting case of a similar scene.
 ## Install
 
 ```
+pipx install git+https://github.com/mtsylko/scene-dedupe
+```
+
+This puts a `scene-dedupe` command on your PATH in an environment of its
+own, so torch does not land in your system Python. Plain `pip install
+git+https://github.com/mtsylko/scene-dedupe` works the same inside a
+virtualenv you made yourself.
+
+To work on the code instead:
+
+```
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -42,7 +53,8 @@ pip install -r requirements.txt
 Tagging needs [ExifTool](https://exiftool.org). On macOS `brew install
 exiftool`, on Debian or Ubuntu `apt install libimage-exiftool-perl`.
 
-The model weights, about 350 MB, download on first run and land in
+Expect about 1.2 GB on disk. Torch and transformers are most of it, and the
+model weights, around 350 MB, download on first run into
 `~/.cache/huggingface`.
 
 ## Tests
@@ -60,13 +72,13 @@ python -m unittest test_group_scenes
 Look at the report first.
 
 ```
-python group_scenes.py ~/Pictures/some-album
+scene-dedupe ~/Pictures/some-album
 ```
 
 Happy with the groups? Write them into the files.
 
 ```
-python group_scenes.py ~/Pictures/some-album --write
+scene-dedupe ~/Pictures/some-album --write
 ```
 
 Then let your photo manager re-read the files. In digiKam that is Tools →
@@ -132,7 +144,7 @@ between runs, so only the clustering is redone and a second pass takes
 seconds.
 
 ```
-python group_scenes.py ~/Pictures/album --cache album.npz --threshold 0.80
+scene-dedupe ~/Pictures/album --cache album.npz --threshold 0.80
 ```
 
 ## Options
