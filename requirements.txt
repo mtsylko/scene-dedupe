@@ -1,0 +1,5 @@
+torch>=2.0
+transformers>=4.30
+pillow>=10.0
+pillow-heif>=0.13
+numpy>=1.24
