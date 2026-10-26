@@ -21,7 +21,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn.functional as F
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 from transformers import AutoImageProcessor, AutoModel
 
 try:
@@ -32,6 +32,8 @@ except ImportError:
     pass
 
 MODEL = "facebook/dinov2-base"
+# bump when anything upstream of the vectors changes, so old caches miss
+EMBEDDING_VERSION = 2
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".tif", ".tiff"}
 BATCH = 16
 EXIF_IFD = 0x8769
@@ -84,7 +86,7 @@ def shot_time(path):
 
 def stamp(path):
     info = path.stat()
-    return f"{path}|{info.st_mtime_ns}|{info.st_size}"
+    return f"{EMBEDDING_VERSION}|{path}|{info.st_mtime_ns}|{info.st_size}"
 
 
 def load_cache(cache_path):
@@ -124,7 +126,8 @@ def embed(paths, device, cache_path):
             usable = []
             for path in batch:
                 try:
-                    images.append(Image.open(path).convert("RGB"))
+                    upright = ImageOps.exif_transpose(Image.open(path))
+                    images.append(upright.convert("RGB"))
                     usable.append(path)
                 except (OSError, UnidentifiedImageError) as error:
                     log(f"skipped {path.name}, {error}")
@@ -372,7 +375,7 @@ def parse_args():
         epilog="run without --write first, check the report, then tag",
     )
     parser.add_argument("folder", type=Path, help="folder with photos")
-    parser.add_argument("--threshold", type=float, default=0.75,
+    parser.add_argument("--threshold", type=float, default=0.85,
                         help="cosine similarity needed to join a group")
     parser.add_argument("--gap", type=float, default=180.0,
                         help="seconds allowed between consecutive shots")
